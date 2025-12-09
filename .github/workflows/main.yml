@@ -1,11 +1,8 @@
-# Controls when the action will run. Invokes the workflow on push events but only for the main branch
+# GitHub action to demonstrate connecting to AWS using OIDC
 on:
   push:
     branches: [ main ]
   workflow_dispatch:  # Allows manual triggering
-
-env: 
-  AWS_REGION : "us-east-1" #Change to reflect your Region
 
 # Permission can be added at job level or workflow level    
 permissions:
@@ -15,15 +12,17 @@ jobs:
   AssumeRoleAndCallIdentity:
     runs-on: ubuntu-latest
     steps:
-      - name: Git clone the repository
-        uses: actions/checkout@v3
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1.7.0
         with:
           role-to-assume: "arn:aws:iam::823644459118:role/MK-Github-OIDC" #change to reflect your IAM role’s ARN
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
-          aws-region: ${{ env.AWS_REGION }}
-      # Hello from AWS: WhoAmI
+          aws-region: 'us-east-1'
+      # to check Github action can get temporary credentials from STS
+      - name: Sts GetCallerIdentity
+        run: |
+          aws sts get-caller-identity
+      # To test Github action can access AWS
       - name: SGet S3 List
         run: |
           aws s3 ls
